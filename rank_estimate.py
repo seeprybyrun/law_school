@@ -4,7 +4,9 @@ from operator import add
 from math import floor
 
 NUM_TRIALS = 10000
-SIGMA = 0.5
+SIGMA = 1.0
+OCCURRENCE_THRESHOLD = 0.10
+
 
 def main():
 
@@ -32,7 +34,7 @@ def main():
 
     print 'Semester GPA\t\tEstimated Percentile'
     for score in sorted(average_percentiles.keys(), reverse=True):
-        if previous_occurrences[score] >= 0.2*NUM_TRIALS:
+        if previous_occurrences[score] >= OCCURRENCE_THRESHOLD * NUM_TRIALS:
             print '{:.3f}\t\t\t\t{:.2f}-{:.2f} (avg: {:.2f})'.format(score, min_percentiles[score], max_percentiles[score], average_percentiles[score])
             
 
@@ -75,12 +77,14 @@ def perform_semester_trial():
     all_gpas = [truncate(x,3) for x in all_gpas]
     return sorted(all_gpas, reverse=True)
 
+
 def truncate(x, n):
     x *= 10**n
     x = floor(x) * 1.0
     x /= 10**n
 
     return x
+
 
 def compute_grades(students, grade_distro):
     N = len(students)
@@ -89,44 +93,45 @@ def compute_grades(students, grade_distro):
     while len(grade_distro) > N:
         grade_distro = delete_random_grade_from(grade_distro)
 
-    grades = [(i, students[i][1] + random.gauss(0,SIGMA)) for i in range(N)]
+    grades = [[i, students[i][1] + random.gauss(0,SIGMA)] for i in range(N)]
     grades = sorted(grades, reverse=True, key=lambda x: x[1])
 
-    thresholds = [sum(grade_distro[:1]),
-                  sum(grade_distro[:2]),
-                  sum(grade_distro[:3]),
-                  sum(grade_distro[:4]),
-                  sum(grade_distro[:5]),
-                  sum(grade_distro[:6]),
-                  sum(grade_distro[:7]),
-                  sum(grade_distro[:8]),
-                  sum(grade_distro[:9]),
-                  sum(grade_distro[:10]),
-                  sum(grade_distro[:11])]
+    thresholds = [sum(grade_distro[:1]), 
+                  sum(grade_distro[:2]), 
+                  sum(grade_distro[:3]), 
+                  sum(grade_distro[:4]), 
+                  sum(grade_distro[:5]), 
+                  sum(grade_distro[:6]), 
+                  sum(grade_distro[:7]), 
+                  sum(grade_distro[:8]), 
+                  sum(grade_distro[:9]), 
+                  sum(grade_distro[:10]), 
+                  sum(grade_distro[:11]), 
+                  sum(grade_distro[:12])] 
 
     for i in range(N):
         student_id = grades[i][0]
-        if i <= thresholds[0]:
+        if i < thresholds[0]:
             ret[student_id] = 4.3
-        elif i <= thresholds[1]:
+        elif i < thresholds[1]:
             ret[student_id] = 4.0
-        elif i <= thresholds[2]:
+        elif i < thresholds[2]:
             ret[student_id] = 3.7
-        elif i <= thresholds[3]:
+        elif i < thresholds[3]:
             ret[student_id] = 3.3
-        elif i <= thresholds[4]:
+        elif i < thresholds[4]:
             ret[student_id] = 3.0
-        elif i <= thresholds[5]:
+        elif i < thresholds[5]:
             ret[student_id] = 2.7
-        elif i <= thresholds[6]:
+        elif i < thresholds[6]:
             ret[student_id] = 2.3
-        elif i <= thresholds[7]:
+        elif i < thresholds[7]:
             ret[student_id] = 2.0
-        elif i <= thresholds[8]:
+        elif i < thresholds[8]:
             ret[student_id] = 1.7
-        elif i <= thresholds[9]:
+        elif i < thresholds[9]:
             ret[student_id] = 1.3
-        elif i <= thresholds[10]:
+        elif i < thresholds[10]:
             ret[student_id] = 1.0
         else:
             ret[student_id] = 0.0
